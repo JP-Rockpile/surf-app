@@ -1,0 +1,84 @@
+<h1>Wave Watcher</h1>
+<h3>
+  This app helps surfers of all levels quickly and easily analyze their surf
+  report of choice.
+</h3>
+
+<h2>Select A Beach</h2>
+
+<mat-tab-group>
+  <mat-tab label="From List">
+    <select (change)="updateBeach($event)">
+      <option>--Select--</option>
+      <option *ngFor="let x of beaches">{{ x.name }}</option>
+    </select>
+  </mat-tab>
+  <mat-tab label="Manual Entry">
+    <label>Latitude: </label>
+    <input (change)="manualLatitude($event)" />
+    <label> Longitude: </label>
+    <input (change)="manualLongitude($event)" />
+  </mat-tab>
+</mat-tab-group>
+
+<h2>Preferences</h2>
+<p>Select Ability Or Manully Input Preferences Under Advanced Options</p>
+
+<mat-tab-group>
+  <mat-tab label="Surf Ability">
+    <select (change)="updateAbility($event)">
+      <option>--Select--</option>
+      <option *ngFor="let x of abilities">{{ x.title }}</option>
+    </select>
+  </mat-tab>
+  <mat-tab label="Advanced Options">
+    <label>Max Wave Height: </label>
+    <select (change)="updateMaxWave($event)">
+      <option>--Select--</option>
+      <option *ngFor="let x of waves">{{ x.title }}</option>
+    </select>
+    <br>
+    <label>Weather Preference: </label>
+    <select (change)="updateWeather($event)">
+      <option>--Select--</option>
+      <option *ngFor="let x of weather">{{ x.title }}</option>
+    </select>
+    <br>
+    <label>Activity Start Time: </label>
+    <select (change)="updateTime($event)">
+      <option>--Select--</option>
+      <option *ngFor="let x of startTime">{{ x.title }}</option>
+    </select>
+    <br>
+    <label>Surf Report Forecast: </label>
+    <select (change)="updateForecast($event)">
+      <option>--Select--</option>
+      <option *ngFor="let x of forecastLength">{{ x.title }}</option>
+    </select>
+  </mat-tab>
+</mat-tab-group>
+
+<div>
+<button mat-stroked-button (click)="generateReport()">View Report</button>
+</div>
+
+
+<div *ngIf="displayReport == true">
+  <p>Your surf status right now:</p> <br> <p [ngClass]="getCurrentStatusClass()"> <b>{{ currentStatus }}</b></p>
+  <p>The waves are currently a max height of <b>{{ currentWaveSize }} feet!</b></p>
+
+  <div class="grid-div">
+    <p>Surf Report for the Next {{ reportDuration }}:</p>
+    <ag-grid-angular
+      class="ag-theme-alpine"
+      style="height: 500px; width: auto;"
+      [rowData]="rowData"
+      [columnDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+      [rowClassRules]="rowClassRules"
+      (columnResized)="onColumnResized($event)"
+      (gridReady)="onGridReady($event)"
+    >
+    </ag-grid-angular>
+  </div>
+</div>

@@ -1,0 +1,29 @@
+*{
+    text-align: center;
+    align-items: center;
+}
+
+.grid-div {
+    margin: auto;
+    align-items: center;
+}
+
+select {
+    margin-top: 20px;
+}
+
+button {
+    margin-top: 20px;
+}
+
+input {
+    margin-top: 20px;
+}
+
+:host >>> .good-surf {
+    background-color: rgb(169, 255, 174) !important;
+}
+
+.bad-surf {
+    background-color: rgb(255, 86, 86);
+}
