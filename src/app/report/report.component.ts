@@ -11,8 +11,8 @@ import { StormGlassAPIService } from '../Services/storm-glass-api.service';
 })
 export class ReportComponent implements OnInit {
 
-  private gridApi!: GridApi;
-  private gridColumnApi!: ColumnApi
+  gridApi!: GridApi;
+  gridColumnApi!: ColumnApi
 
   beaches: any = [];
   abilities: any = [];
@@ -42,6 +42,7 @@ export class ReportComponent implements OnInit {
   timePref: string = ':';
   forecastPref: number = 23;
 
+  // initializing ag-grid values
   rowData: any[] = [];
   colDefs: ColDef[] = [
     {field: 'time', headerName: 'Time', valueFormatter: this.dateFormatter},
@@ -53,10 +54,12 @@ export class ReportComponent implements OnInit {
     {field: 'windSpeed.noaa', headerName: 'Wind Speed (Knots)'},
   ];
 
+  // applicable to all ag-grid columns
   defaultColDef: ColDef = {
     sortable: true, filter: true
   }
-
+  
+  // setting background color for good-surf if conditions are met
   public rowClassRules: RowClassRules = {
     // row style function
     'good-surf': (params) => {
@@ -68,6 +71,8 @@ export class ReportComponent implements OnInit {
   constructor(private reportService: StormGlassAPIService) { }
 
   ngOnInit(): void {
+
+    //initializing HTML dropdown options
     this.beaches = [
       {name: 'Pacific Beach', lat: 32.798232, lng: -117.259311},
       {name: 'El Porto', lat: 33.90392932528822, lng: -118.42409350732741}
@@ -134,6 +139,7 @@ export class ReportComponent implements OnInit {
     
   }
 
+  //updating beach selection for API based upon HTML dropdown selection
   updateBeach(event:any){
     this.selectedBeach = event.target.value;
     console.log(this.selectedBeach);
@@ -147,6 +153,18 @@ export class ReportComponent implements OnInit {
     console.log(this.longitude);
   }
 
+  //manual beach input
+  manualLatitude(event:any){
+    this.latitude = event.target.value;
+    console.log(this.latitude);
+  }
+
+  manualLongitude(event:any){
+    this.longitude = event.target.value;
+    console.log(this.longitude);
+  }
+
+  //updating ability and wave height for API based upon HTML dropdown selection
   updateAbility(event:any){
     this.selectedAbility = event.target.value;
     console.log(this.selectedAbility);
@@ -158,6 +176,7 @@ export class ReportComponent implements OnInit {
     console.log(this.abilityMaxWaveHeight);
   }
 
+  //updating ability and wave height for API based upon HTML dropdown selection - Advanced Options
   updateMaxWave(event:any){
     this.selectedField = event.target.value;
     for(let i = 0; i < this.waves.length; i++){
@@ -168,6 +187,7 @@ export class ReportComponent implements OnInit {
     console.log(this.abilityMaxWaveHeight);
   }
 
+  //updating weather based upon HTML dropdown selection - Advanced Options
   updateWeather(event:any){
     this.selectedField = event.target.value;
     for(let i = 0; i < this.weather.length; i++){
@@ -182,6 +202,7 @@ export class ReportComponent implements OnInit {
     console.log(this.coverPref);
   }
 
+  //updating time based upon HTML dropdown selection - Advanced Options
   updateTime(event:any){
     this.selectedField = event.target.value;
     for(let i = 0; i < this.startTime.length; i++){
@@ -192,6 +213,7 @@ export class ReportComponent implements OnInit {
     console.log(this.timePref);
   }
 
+  //updating forecast based upon HTML dropdown selection - effects API input - Advanced Options
   updateForecast(event:any){
     this.selectedField = event.target.value;
     for(let i = 0; i < this.forecastLength.length; i++){
@@ -203,24 +225,17 @@ export class ReportComponent implements OnInit {
     console.log(this.forecastPref);
   }
 
-  manualLatitude(event:any){
-    this.latitude = event.target.value;
-    console.log(this.latitude);
-  }
-
-  manualLongitude(event:any){
-    this.longitude = event.target.value;
-    console.log(this.longitude);
-  }
-
+  //make API call - retrieve and assign data - must be async due to load time
   async generateReport(){
     this.start = Math.floor(new Date().getTime() / 1000);
     var dt = new Date();
     dt.setHours( dt.getHours() + this.forecastPref );
     this.end = Math.floor(new Date(dt).getTime() / 1000);
     console.log('start: ' + this.start + 'end: ' + this.end);
+    //API call
     await fetch(`https://api.stormglass.io/v2/weather/point?lat=${this.latitude}&lng=${this.longitude}&params=${this.params}&start=${this.start}&end=${this.end}`, {
       headers: {
+      // defined at the top
       'Authorization': this.APIkey
       }
     }).then((response) => response.json()).then((jsonData) => {
@@ -234,6 +249,7 @@ export class ReportComponent implements OnInit {
   async sortSurfData(){
     await console.log(this.reportData.hours);
     this.currentSurfStatus();
+    // fully dynamic column header option...
     // for(let key in this.reportData.hours[0]){
     //   this.colDefs.push({field: key});
     // }
@@ -246,6 +262,7 @@ export class ReportComponent implements OnInit {
     console.log(this.rowData);
   }
 
+  // fully dynamic column header option... not in current use
   objectFormatter(params: ValueFormatterParams){
     if(typeof params == 'object'){
       return JSON.stringify(params);
@@ -254,10 +271,12 @@ export class ReportComponent implements OnInit {
     }
   }
 
+  //formats dates for ag-grid display - does not alter actual value
   dateFormatter(params: ValueFormatterParams){
     return params.value ? (new Date(params.value)).toLocaleString() : '';
   }
 
+  // HTML display for current surf status - takes largest wave height for comparison
   currentSurfStatus(){
     var heightArr = [];
     var icon = this.reportData.hours[0].waveHeight.icon;
@@ -279,6 +298,7 @@ export class ReportComponent implements OnInit {
     }
   }
 
+  // for HTML display current status color
   getCurrentStatusClass(){
     if(this.abilityMaxWaveHeight < this.currentWaveSize){
       return 'bad-surf';
@@ -289,11 +309,13 @@ export class ReportComponent implements OnInit {
     }
   }
 
+  // AG-Grid sizing adjustment function
   onGridReady(params: GridReadyEvent) {
     this.gridApi = params.api;
     this.gridColumnApi = params.columnApi;
   }
 
+  // AG-Grid sizing adjustment function
   onColumnResized(params: ColumnResizedEvent) {
     console.log(params);
   }
